@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="16" fill="#c2372c"/>
+  <rect x="10" y="7" width="44" height="50" rx="9" fill="#f7f2e7"/>
+  <text x="32" y="43" text-anchor="middle" font-size="29" font-weight="800" fill="#c2372c" font-family="sans-serif">中</text>
+</svg>
