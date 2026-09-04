@@ -3,9 +3,10 @@ import { randomUUID } from 'node:crypto'
 
 function store() { return getStore({ name: 'z-mahjong' }) }
 const playersKey = 'players.json'; const gamesKey = 'games.json'
-const readPlayers = async () => await store().get(playersKey, { type: 'json' }) || []
+const getOpts = { type: 'json', consistency: 'strong' }
+const readPlayers = async () => await store().get(playersKey, getOpts) || []
 const writePlayers = async (v) => await store().setJSON(playersKey, v)
-const readGames = async () => await store().get(gamesKey, { type: 'json' }) || []
+const readGames = async () => await store().get(gamesKey, getOpts) || []
 const writeGames = async (v) => await store().setJSON(gamesKey, v)
 const error = (message, status) => { throw Object.assign(new Error(message), { status }) }
 

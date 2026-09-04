@@ -57,16 +57,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     })()
   }, [refreshPlayers, refreshLeaderboard, refreshGames, refreshPreviousTables])
 
-  const createPlayer = useCallback(async (name: string) => { const p = await api.createPlayer(name); await Promise.all([refreshPlayers(), refreshLeaderboard()]); return p }, [refreshPlayers, refreshLeaderboard])
-  const updatePlayer = useCallback(async (id: string, name: string) => { const p = await api.updatePlayer(id, name); await Promise.all([refreshPlayers(), refreshLeaderboard()]); return p }, [refreshPlayers, refreshLeaderboard])
-  const deletePlayer = useCallback(async (id: string) => { await api.deletePlayer(id); await Promise.all([refreshPlayers(), refreshLeaderboard(), refreshGames(), refreshPreviousTables()]) }, [refreshPlayers, refreshLeaderboard, refreshGames, refreshPreviousTables])
+  const createPlayer = useCallback(async (name: string) => { const p = await api.createPlayer(name); setPlayers(prev => [...prev, p]); await refreshLeaderboard(); return p }, [refreshLeaderboard])
+  const updatePlayer = useCallback(async (id: string, name: string) => { const p = await api.updatePlayer(id, name); setPlayers(prev => prev.map(x => x.id === id ? p : x)); await refreshLeaderboard(); return p }, [refreshLeaderboard])
+  const deletePlayer = useCallback(async (id: string) => { await api.deletePlayer(id); setPlayers(prev => prev.filter(x => x.id !== id)); await Promise.all([refreshLeaderboard(), refreshGames(), refreshPreviousTables()]) }, [refreshLeaderboard, refreshGames, refreshPreviousTables])
 
-  const startGame = useCallback(async (playerIds: string[]) => { const g = await api.startGame(playerIds); await refreshGames(); return g }, [refreshGames])
+  const startGame = useCallback(async (playerIds: string[]) => { const g = await api.startGame(playerIds); setGames(prev => [...prev, g]); return g }, [])
   const declareWinner = useCallback(async (gameId: string, winnerId: string) => {
     const g = await api.declareWinner(gameId, winnerId)
-    await Promise.all([refreshLeaderboard(), refreshGames(), refreshPreviousTables()])
+    setGames(prev => prev.map(x => x.id === gameId ? g : x))
+    await Promise.all([refreshLeaderboard(), refreshPreviousTables()])
     return g
-  }, [refreshLeaderboard, refreshGames, refreshPreviousTables])
+  }, [refreshLeaderboard, refreshPreviousTables])
 
   const fetchPlayerStats = useCallback(async (id: string) => {
     const stats = await api.getPlayerStats(id)
@@ -76,8 +77,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const resetAll = useCallback(async (password: string) => {
     await api.resetAll(password)
-    await Promise.all([refreshGames(), refreshLeaderboard(), refreshPreviousTables()])
-  }, [refreshGames, refreshLeaderboard, refreshPreviousTables])
+    setGames([])
+    await Promise.all([refreshLeaderboard(), refreshPreviousTables()])
+  }, [refreshLeaderboard, refreshPreviousTables])
 
   const value = useMemo(() => ({
     players, leaderboard, games, previousTables, playerStats: playerStatsCache, loading,
